@@ -1,0 +1,7 @@
+[package]
+
+name = "sinkhole"
+version = "0.0.1"
+license = "MIT"
+authors = [ "Dean Eigenmann <dean@status.im>" "Gonçalo Pestana <g6pestana@gmail.com>" ]
+
