@@ -1,2 +1,3 @@
 # sinkhole-rs
-Rust implementation of sinkhole
+
+Rust implementation of sinkhole PIR.
