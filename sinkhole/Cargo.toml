@@ -18,4 +18,4 @@ travis-ci = { repository = "hashmatter/sinkhole-rs" }
 name = "sinkhole"
 path = "src/lib.rs"
 
-## @TODO THIS WOULD PROBABLY DO EVERYTHING?
+## @TODO THIS PACKAGE WOULD PROBABLY DO EVERYTHING?
