@@ -8,3 +8,6 @@ repository = "https://github.com/hashmatter/sinkhole-rs"
 description = """
 The core traits and types in for the `sinkhole` library.
 """
+
+[badges]
+travis-ci = { repository = "hashmatter/sinkhole-rs" }

@@ -11,6 +11,8 @@ description = """
 Rust implementation of sinkhole PIR
 """
 
+[badges]
+travis-ci = { repository = "hashmatter/sinkhole-rs" }
 
 [lib]
 name = "sinkhole"
