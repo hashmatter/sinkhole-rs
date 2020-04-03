@@ -6,7 +6,7 @@ license = "MIT"
 authors = [ "Dean Eigenmann <dean@status.im>", "Gonçalo Pestana <g6pestana@gmail.com>" ]
 repository = "https://github.com/hashmatter/sinkhole-rs"
 description = """
-The core traits and types in for the `sinkhole` library.
+The core traits and types for the `sinkhole` library.
 """
 
 [badges]
