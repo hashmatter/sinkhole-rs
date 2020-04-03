@@ -1,0 +1,20 @@
+[package]
+
+name = "sinkhole"
+version = "0.0.1"
+license = "MIT"
+authors = [ "Dean Eigenmann <dean@status.im>", "Gonçalo Pestana <g6pestana@gmail.com>" ]
+keywords = ["PIR", "private information retreival"]
+repository = "https://github.com/hashmatter/sinkhole-rs"
+description = """
+Rust implementation of sinkhole PIR
+"""
+
+[badges]
+travis-ci = { repository = "hashmatter/sinkhole-rs" }
+
+[lib]
+name = "sinkhole"
+path = "src/lib.rs"
+
+## @TODO THIS PACKAGE WOULD PROBABLY DO EVERYTHING?
