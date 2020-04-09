@@ -3,4 +3,5 @@
 members = [
     "sinkhole",
     "sinkhole-core",
+    "sinkhole-query",
 ]
