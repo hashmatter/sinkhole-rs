@@ -11,4 +11,3 @@ pub trait Storage {
     /// Returns the data for a given ID.
     fn retrieve(&self, id: [u8; 32]) -> [u8];
 }
-
