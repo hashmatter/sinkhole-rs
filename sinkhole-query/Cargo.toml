@@ -11,3 +11,6 @@ The query generation and decryption used by the `sinkhole` library.
 
 [badges]
 travis-ci = { repository = "hashmatter/sinkhole-rs" }
+
+[dependencies]
+sinkhole-core = { path = "../sinkhole-core", version = "0.0.1" }

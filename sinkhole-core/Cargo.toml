@@ -11,3 +11,7 @@ The core traits and types for the `sinkhole` library.
 
 [badges]
 travis-ci = { repository = "hashmatter/sinkhole-rs" }
+
+[features]
+default = ["std"]
+std = []
