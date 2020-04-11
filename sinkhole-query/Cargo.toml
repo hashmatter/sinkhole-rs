@@ -2,6 +2,7 @@
 
 name = "sinkhole-query"
 version = "0.0.1"
+edition = "2018"
 license = "MIT"
 authors = [ "Dean Eigenmann <dean@eigenmann.me>", "Gonçalo Pestana <g6pestana@gmail.com>" ]
 repository = "https://github.com/hashmatter/sinkhole-rs"
@@ -11,3 +12,6 @@ The query generation and decryption used by the `sinkhole` library.
 
 [badges]
 travis-ci = { repository = "hashmatter/sinkhole-rs" }
+
+[dependencies]
+sinkhole-core = { path = "../sinkhole-core", version = "0.0.1" }
