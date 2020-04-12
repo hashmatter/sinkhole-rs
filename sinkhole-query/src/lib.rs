@@ -15,7 +15,8 @@ pub trait Builder {
     fn decrypt(result: &[u8], private_key: sinkhole_core::PrivateKey) -> &[u8];
 }
 
-/// A query, represents all the encoded fields to query.
+/// This struct represents PIR queries.
 pub struct Query {
+    /// The encoded field queries.
     fields: [Vec<u8>]
 }
