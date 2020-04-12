@@ -18,5 +18,5 @@ pub trait Builder {
 /// This struct represents PIR queries.
 pub struct Query {
     /// The encoded field queries.
-    fields: [Vec<u8>]
+    fields: [Vec<u8>],
 }
