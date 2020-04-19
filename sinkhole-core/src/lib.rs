@@ -1,13 +1,10 @@
 //! The core traits and types for the `sinkhole` library.
 
-/// A representation of the sinkhole database to query.
-///
-/// Implementations of this trait contain the
-/// servers private data addition and retrieval.
-pub trait Storage {
-    /// Adds content to the database.
-    fn add(&self, content: &[u8]);
+extern crate hex;
+extern crate rand_core;
+extern crate elgamal_ristretto;
+pub extern crate curve25519_dalek;
 
-    /// Returns the data for a given ID.
-    fn retrieve(&self, id: [u8; 32]) -> &[u8];
-}
+mod errors;
+mod server_elgamal;
+
