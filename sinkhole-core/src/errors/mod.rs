@@ -1,7 +1,7 @@
 pub mod errors {
     #[derive(Debug)]
     pub struct ServerError {
-        pub error: String
+        pub error: String,
     }
 
     impl std::fmt::Display for ServerError {
