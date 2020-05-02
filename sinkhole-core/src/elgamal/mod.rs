@@ -1,4 +1,3 @@
-use crate::traits;
 use traits::core::Storage as storage_trait;
 
 use errors::errors::ServerError;
@@ -22,7 +21,7 @@ impl Storage {
         return Storage {
             secret_key: sk,
             size: store.len(),
-            store: RefCell::new(store), // mutable interior of Cell
+            store: RefCell::new(store),
         };
     }
 
@@ -36,7 +35,6 @@ impl Storage {
 }
 
 impl storage_trait for Storage {
-    // Adds new content to database state
     fn add(&self, content: Scalar, index: usize) -> Result<(), ServerError> {
         if index > self.size - 1 {
             return Err(ServerError {
@@ -103,6 +101,33 @@ pub fn generate_query(
     Ok(query)
 }
 
+pub fn recover_scalar(
+    point: curve25519_dalek::ristretto::RistrettoPoint,
+    k: u32,
+) -> Result<Scalar, String> {
+    let mut accumulator = Scalar::zero();
+    for _ in 0..2u64.pow(k) {
+        accumulator = Scalar::one() + accumulator;
+        println!("{:?}", accumulator);
+        if &accumulator * &RISTRETTO_BASEPOINT_TABLE == point {
+            return Ok(accumulator);
+        }
+    }
+    Err(format!["Scalar is not in [0..2^{}] range", k])
+}
+
+pub fn recover_scalar_mul(
+    point: curve25519_dalek::ristretto::RistrettoPoint,
+    k: u32,
+) -> Result<Scalar, String> {
+    for i in 0..2u64.pow(k) {
+        if &Scalar::from(i as u64) * &RISTRETTO_BASEPOINT_TABLE == point {
+            return Ok(Scalar::from(i as u64));
+        }
+    }
+    Err(format!["Scalar is not in [0..2^{}] range", k])
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -129,11 +154,11 @@ mod tests {
         let size = 2;
         let (sk, pk) = generate_key_pair();
 
-        let content_idx_0 = Scalar::random(&mut csprng);
-        let content_idx_1 = Scalar::random(&mut csprng);
+        let content_idx_0 = Scalar::from(3224u64);
+        let content_idx_1 = Scalar::from(1048575u64);
         let storage = vec![content_idx_0, content_idx_1];
 
-        let server = Storage::new(sk, storage);
+        let server = Storage::new(sk, storage.clone());
 
         // B) client-side
         let (client_sk, client_pk) = generate_key_pair();
@@ -148,6 +173,8 @@ mod tests {
         let result = client_sk.decrypt(&enc_result);
 
         // E) retrieve Scalar from RistrettoPoint
-        //assert!(result == storage[query_idx]);
+        let result_content = recover_scalar_mul(result, 20).unwrap();
+
+        assert!(result_content == storage[query_idx]);
     }
 }
