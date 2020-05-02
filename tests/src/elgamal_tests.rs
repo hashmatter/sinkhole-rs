@@ -34,8 +34,8 @@ mod tests {
         let storage = Storage::new(storage_sk, content.clone());
 
         // client setup
-        let (_, client_sk) = generate_key_pair();
-        let query = Query::new(client_sk.clone(), size_storage as usize, query_index);
+        let (client_pk, client_sk) = generate_key_pair();
+        let query = Query::new(client_pk, size_storage as usize, query_index);
 
         assert!(!query.is_err());
         let query = query.unwrap();

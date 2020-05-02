@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 use traits::core::Storage as storage_trait;
 
-use errors::errors::ServerError;
+use errors::errors::StorageError;
 use rand_core::OsRng;
 use std::cell::RefCell;
 
@@ -39,9 +39,9 @@ impl Storage {
 }
 
 impl storage_trait for Storage {
-    fn add(&self, content: Scalar, index: usize) -> Result<(), ServerError> {
+    fn add(&self, content: Scalar, index: usize) -> Result<(), StorageError> {
         if index > self.size - 1 {
-            return Err(ServerError {
+            return Err(StorageError {
                 error: "Index should not be larger than the size of the storage".to_string(),
             });
         }
@@ -54,9 +54,9 @@ impl storage_trait for Storage {
     }
 
     // Runs encrypted query against the database state
-    fn retrieve(&self, query: Vec<Ciphertext>) -> Result<Ciphertext, ServerError> {
+    fn retrieve(&self, query: Vec<Ciphertext>) -> Result<Ciphertext, StorageError> {
         if query.len() != self.size {
-            return Err(ServerError {
+            return Err(StorageError {
                 error: "Query vector should have the same size as the storage".to_string(),
             });
         }

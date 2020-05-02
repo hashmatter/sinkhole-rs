@@ -3,7 +3,7 @@
 pub mod query {
     pub trait Query {
         /// Constructs an encrypted query.
-        fn construct(
+        fn new(
             content: &[u8],
             //public_key: sinkhole_core::PublicKey
         ) -> &[u8];
