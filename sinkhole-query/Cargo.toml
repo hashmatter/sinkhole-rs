@@ -11,3 +11,8 @@ The query generation and decryption used by the `sinkhole` library.
 
 [badges]
 travis-ci = { repository = "hashmatter/sinkhole-rs" }
+
+[dependencies]
+curve25519-dalek = { version = "2.0.0", default-features = false, features = ["serde"] }
+elgamal_ristretto = "0.2.3"
+
