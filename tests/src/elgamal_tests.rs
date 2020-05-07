@@ -1,5 +1,5 @@
-#![allow(dead_code)]
 mod tests {
+
     use sinkhole_core::traits::core::Query as query_trait;
     use sinkhole_core::traits::core::Storage as storage_trait;
     use sinkhole_elgamal::client::Query;

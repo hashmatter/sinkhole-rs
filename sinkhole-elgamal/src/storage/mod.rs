@@ -67,7 +67,7 @@ impl sinkhole_core::traits::core::Storage for Storage {
             mult_vector.push(mul);
         }
 
-        let mut sum: Ciphertext = mult_vector[0] - mult_vector[0];
+        let mut sum: Ciphertext = mult_vector[0];
         for cipher in mult_vector {
             sum = sum + cipher;
         }
