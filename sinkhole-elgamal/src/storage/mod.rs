@@ -1,7 +1,6 @@
 #![allow(dead_code)]
-use traits::core::Storage as storage_trait;
+use sinkhole_core::errors::errors::StorageError;
 
-use errors::errors::StorageError;
 use rand_core::OsRng;
 use std::cell::RefCell;
 
@@ -38,7 +37,7 @@ impl Storage {
     }
 }
 
-impl storage_trait for Storage {
+impl sinkhole_core::traits::core::Storage for Storage {
     fn add(&self, content: Scalar, index: usize) -> Result<(), StorageError> {
         if index > self.size - 1 {
             return Err(StorageError {

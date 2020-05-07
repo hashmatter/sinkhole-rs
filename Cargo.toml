@@ -1,8 +1,7 @@
 [workspace]
 
 members = [
-    "sinkhole",
     "sinkhole-core",
-    "sinkhole-query",
+    "sinkhole-elgamal",
 		"tests",
 ]

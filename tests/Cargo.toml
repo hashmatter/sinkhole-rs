@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 sinkhole-core = { path = "../sinkhole-core" }
-sinkhole-query = { path = "../sinkhole-query" }
+sinkhole-elgamal = { path = "../sinkhole-elgamal" }
 elgamal_ristretto = "0.2.3"
 rand_core = "0.5.1"
 curve25519-dalek = "2.0.0"

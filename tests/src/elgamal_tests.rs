@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 mod tests {
-    use sinkhole_core::elgamal::Storage;
     use sinkhole_core::traits::core::Storage as storage_trait;
-    use sinkhole_query::elgamal::{recover_scalar, Query};
+    use sinkhole_elgamal::client::{recover_scalar, Query};
+    use sinkhole_elgamal::storage::Storage;
 
     use curve25519_dalek::scalar::Scalar;
     use elgamal_ristretto::private::SecretKey;

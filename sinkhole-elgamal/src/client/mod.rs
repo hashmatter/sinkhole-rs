@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use errors::errors::QueryError;
+use sinkhole_core::errors::errors::QueryError;
 
 use elgamal_ristretto::ciphertext::Ciphertext;
 use elgamal_ristretto::public::PublicKey;
