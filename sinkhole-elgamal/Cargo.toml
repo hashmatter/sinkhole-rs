@@ -1,6 +1,6 @@
 [package]
 
-name = "sinkhole"
+name = "sinkhole-elgamal"
 version = "0.0.1"
 edition = "2018"
 license = "MIT"
@@ -15,7 +15,13 @@ Rust implementation of sinkhole PIR
 travis-ci = { repository = "hashmatter/sinkhole-rs" }
 
 [lib]
-name = "sinkhole"
+name = "sinkhole_elgamal"
 path = "src/lib.rs"
 
-## @TODO THIS PACKAGE WOULD PROBABLY DO EVERYTHING?
+[dependencies]
+sinkhole-core = { path = "../sinkhole-core" }
+elgamal_ristretto = "0.2.3"
+curve25519-dalek = "2.0.0"
+rand_core = "0.5.1"
+bincode = "1.2.1"
+
