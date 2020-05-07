@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use sinkhole_core::errors::errors::QueryError;
+use sinkhole_core::errors::QueryError;
 
 use curve25519_dalek::constants::RISTRETTO_BASEPOINT_TABLE;
 use curve25519_dalek::scalar::Scalar;
@@ -34,7 +34,7 @@ impl Query {
 
         Ok(Query {
             private_key: sk,
-            size: size,
+            size,
             encrypted: encrypted_query,
         })
     }

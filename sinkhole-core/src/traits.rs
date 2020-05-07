@@ -2,7 +2,7 @@ pub mod core {
     extern crate curve25519_dalek;
     extern crate elgamal_ristretto;
 
-    use crate::errors::errors::{QueryError, StorageError};
+    use crate::errors::{QueryError, StorageError};
 
     // #TODO: may need a higher abstraction representation of a Scalar (result)
     // Ciphertext

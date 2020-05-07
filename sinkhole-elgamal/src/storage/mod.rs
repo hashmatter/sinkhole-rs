@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use sinkhole_core::errors::errors::StorageError;
+use sinkhole_core::errors::StorageError;
 
 use rand_core::OsRng;
 use std::cell::RefCell;
@@ -18,22 +18,22 @@ pub struct Storage {
 
 impl Storage {
     pub fn new(sk: SecretKey, store: Vec<Scalar>) -> Self {
-        return Storage {
+        Storage {
             secret_key: sk,
             size: store.len(),
             store: RefCell::new(store),
-        };
+        }
     }
 
     pub fn new_empty(sk: SecretKey, size: usize) -> Self {
         let mut csprng = OsRng;
         let empty_store: Vec<Scalar> = (1..size).map(|_| Scalar::random(&mut csprng)).collect();
 
-        return Storage {
+        Storage {
             secret_key: sk,
-            size: size,
+            size,
             store: RefCell::new(empty_store),
-        };
+        }
     }
 }
 
