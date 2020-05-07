@@ -1,7 +1,8 @@
 #![allow(dead_code)]
 mod tests {
+    use sinkhole_core::traits::core::Query as query_trait;
     use sinkhole_core::traits::core::Storage as storage_trait;
-    use sinkhole_elgamal::client::{recover_scalar, Query};
+    use sinkhole_elgamal::client::Query;
     use sinkhole_elgamal::storage::Storage;
 
     use curve25519_dalek::scalar::Scalar;
@@ -34,20 +35,18 @@ mod tests {
         let storage = Storage::new(storage_sk, content.clone());
 
         // client setup
-        let (client_pk, client_sk) = generate_key_pair();
-        let query = Query::new(client_pk, size_storage as usize, query_index);
+        let (_, client_sk) = generate_key_pair();
+        let query = Query::new(client_sk, size_storage as usize, query_index);
 
         assert!(!query.is_err());
         let query = query.unwrap();
 
         // client queries storage
-        let encrypted_result = storage.retrieve(query.encrypted);
+        let encrypted_result = storage.retrieve(query.clone().encrypted);
         assert!(!encrypted_result.is_err());
-        let encrypted_result = encrypted_result.unwrap();
 
-        // client-side result decryption and decoding
-        let encoded_result = client_sk.decrypt(&encrypted_result);
-        let result = recover_scalar(encoded_result, 32);
+        let encrypted_result = encrypted_result.unwrap();
+        let result = query.extract_result(encrypted_result, 32);
 
         assert!(!result.is_err());
         let result = result.unwrap();

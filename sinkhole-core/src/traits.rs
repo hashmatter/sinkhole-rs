@@ -2,9 +2,12 @@ pub mod core {
     extern crate curve25519_dalek;
     extern crate elgamal_ristretto;
 
+    use crate::errors::errors::{QueryError, StorageError};
+
+    // #TODO: may need a higher abstraction representation of a Scalar (result)
+    // Ciphertext
     use curve25519_dalek::scalar::Scalar;
     use elgamal_ristretto::ciphertext::Ciphertext;
-    use errors::errors::StorageError;
 
     /// A representation of the sinkhole database to query.
     ///
@@ -19,16 +22,6 @@ pub mod core {
     }
 
     pub trait Query {
-        /// Constructs an encrypted query.
-        fn new(
-            content: &[u8],
-            //public_key: sinkhole_core::PublicKey
-        ) -> &[u8];
-
-        /// Decrypts a decodes the result returned by the PIR server.
-        fn retrieve(
-            result: &[u8],
-            //private_key: sinkhole_core::PrivateKey
-        ) -> &[u8];
+        fn extract_result(&self, result: Ciphertext, k: u32) -> Result<Scalar, QueryError>;
     }
 }
