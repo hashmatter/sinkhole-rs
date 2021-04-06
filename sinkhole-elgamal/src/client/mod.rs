@@ -57,6 +57,6 @@ fn recover_scalar(
         }
     }
     Err(QueryError {
-        error: format!["Scalar is not in [0..2^{}] range", k],
+        error: format!["Scalar is not within the [0..2^{}] range", k],
     })
 }

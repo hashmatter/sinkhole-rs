@@ -10,7 +10,6 @@ mod tests {
     use elgamal_ristretto::public::PublicKey;
     use rand_core::OsRng;
 
-    // utils
     fn generate_key_pair() -> (PublicKey, SecretKey) {
         let sk = SecretKey::new(&mut OsRng);
         let pk = PublicKey::from(&sk);
