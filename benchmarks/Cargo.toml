@@ -20,6 +20,7 @@ path = "src/lib.rs"
 
 [dependencies]
 sinkhole-core = { path = "../sinkhole-core" }
+sinkhole-elgamal = { path = "../sinkhole-elgamal" }
 elgamal_ristretto = "0.2.3"
 curve25519-dalek = "2.0.0"
 rand_core = "0.5.1"
