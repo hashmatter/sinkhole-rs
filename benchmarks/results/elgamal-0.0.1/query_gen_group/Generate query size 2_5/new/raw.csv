@@ -1,0 +1,11 @@
+group,function,value,throughput_num,throughput_type,sample_measured_value,unit,iteration_count
+query_gen_group,Generate query size 2^5,,,,95642465.0,ns,21
+query_gen_group,Generate query size 2^5,,,,183374326.0,ns,42
+query_gen_group,Generate query size 2^5,,,,275576629.0,ns,63
+query_gen_group,Generate query size 2^5,,,,365068504.0,ns,84
+query_gen_group,Generate query size 2^5,,,,453627523.0,ns,105
+query_gen_group,Generate query size 2^5,,,,554195924.0,ns,126
+query_gen_group,Generate query size 2^5,,,,642170083.0,ns,147
+query_gen_group,Generate query size 2^5,,,,721946974.0,ns,168
+query_gen_group,Generate query size 2^5,,,,818607518.0,ns,189
+query_gen_group,Generate query size 2^5,,,,928855390.0,ns,210

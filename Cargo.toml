@@ -3,5 +3,6 @@
 members = [
     "sinkhole-core",
     "sinkhole-elgamal",
-		"tests",
+    "tests",
+    "benchmarks",
 ]

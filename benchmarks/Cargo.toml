@@ -1,0 +1,35 @@
+[package]
+
+name = "sinkhole-benchmarks"
+version = "0.0.1"
+edition = "2018"
+license = "MIT"
+authors = [ "Gonçalo Pestana <g6pestana@gmail.com>" ]
+keywords = ["PIR", "private information retreival"]
+repository = "https://github.com/hashmatter/sinkhole-rs"
+description = """
+Benchmarks of sinkhole PIR
+"""
+
+[badges]
+travis-ci = { repository = "hashmatter/sinkhole-rs" }
+
+[lib]
+name = "sinkhole_benchmarks"
+path = "src/lib.rs"
+
+[dependencies]
+sinkhole-core = { path = "../sinkhole-core" }
+sinkhole-elgamal = { path = "../sinkhole-elgamal" }
+elgamal_ristretto = "0.2.3"
+curve25519-dalek = "2.0.0"
+rand_core = "0.5.1"
+bincode = "1.2.1"
+
+[dev-dependencies]
+criterion = { version = "0.3.4", features = ["html_reports"] }
+
+[[bench]]
+name = "elgamal"
+harness = false
+
