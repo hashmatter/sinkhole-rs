@@ -15,10 +15,11 @@ pub mod core {
     /// servers private data addition and retrieval.
     pub trait Storage {
         /// Adds content to the database.
-        fn add(&self, content: Scalar, index: usize) -> Result<(), StorageError>;
+        fn add(&mut self, content: Scalar, index: usize) -> Result<(), StorageError>;
 
         /// Returns the data for a given ID.
         fn retrieve(&self, query: Vec<Ciphertext>) -> Result<Ciphertext, StorageError>;
+        fn retrieve_parallel(&self, query: Vec<Ciphertext>) -> Result<Ciphertext, StorageError>;
     }
 
     pub trait Query {

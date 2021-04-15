@@ -2,9 +2,13 @@
 use sinkhole_core::errors::StorageError;
 
 use rand_core::OsRng;
-use std::cell::RefCell;
+use std::sync::mpsc;
+use std::sync::{Arc, Mutex};
+use std::thread;
 
+use curve25519_dalek::ristretto::RistrettoPoint;
 use curve25519_dalek::scalar::Scalar;
+use curve25519_dalek::traits::Identity;
 use elgamal_ristretto::ciphertext::Ciphertext;
 use elgamal_ristretto::private::SecretKey;
 use elgamal_ristretto::public::PublicKey;
@@ -13,7 +17,7 @@ use elgamal_ristretto::public::PublicKey;
 pub struct Storage {
     secret_key: SecretKey,
     size: usize,
-    store: RefCell<Vec<Scalar>>,
+    store: Vec<Scalar>,
 }
 
 impl Storage {
@@ -21,7 +25,7 @@ impl Storage {
         Storage {
             secret_key: sk,
             size: store.len(),
-            store: RefCell::new(store),
+            store: store,
         }
     }
 
@@ -32,22 +36,22 @@ impl Storage {
         Storage {
             secret_key: sk,
             size,
-            store: RefCell::new(empty_store),
+            store: empty_store,
         }
     }
 }
 
 impl sinkhole_core::traits::core::Storage for Storage {
-    fn add(&self, content: Scalar, index: usize) -> Result<(), StorageError> {
+    fn add(&mut self, content: Scalar, index: usize) -> Result<(), StorageError> {
         if index > self.size - 1 {
             return Err(StorageError {
                 error: "Index should not be larger than the size of the storage".to_string(),
             });
         }
 
-        let mut store = self.store.clone().into_inner();
+        let mut store = self.store.clone();
         store[index] = content; // TODO: how to deal with collisions?
-        self.store.replace(store);
+        self.store = store;
 
         Ok(())
     }
@@ -60,7 +64,7 @@ impl sinkhole_core::traits::core::Storage for Storage {
             });
         }
 
-        let store = self.store.borrow();
+        let store = self.store.clone();
         let mut mult_vector = vec![];
         for (index, content) in store.clone().into_iter().enumerate() {
             let mul = query[index] * content;
@@ -73,6 +77,59 @@ impl sinkhole_core::traits::core::Storage for Storage {
         }
 
         Ok(sum)
+    }
+
+    // Runs encrypted query against the database state in paralell
+    fn retrieve_parallel(&self, query: Vec<Ciphertext>) -> Result<Ciphertext, StorageError> {
+        let size = query.len();
+
+        if query.len() != self.size {
+            return Err(StorageError {
+                error: "Query vector should have the same size as the storage".to_string(),
+            });
+        }
+
+        let user_pk = query[0].pk;
+
+        let mut handles = vec![];
+
+        // todo: refactor
+        let mut zero_ciphertext = Ciphertext {
+            points: (RistrettoPoint::identity(), RistrettoPoint::identity()),
+            pk: user_pk,
+        };
+        zero_ciphertext.points = (RistrettoPoint::identity(), RistrettoPoint::identity());
+
+        let ciphertext_result = Arc::new(Mutex::new(zero_ciphertext));
+        let shared_query = Arc::new(Mutex::new(query));
+        let shared_store = Arc::new(Mutex::new(self.store.clone())); // TODO: remove this clone
+
+        for segment_i in 0..2 {
+            for i in 0..size / 2 {
+                let start_index = segment_i * size / 2;
+
+                let ciphertext_result = Arc::clone(&ciphertext_result);
+                let shared_query = Arc::clone(&shared_query);
+                let shared_store = Arc::clone(&shared_store);
+
+                let handle = thread::spawn(move || {
+                    let mut sum = ciphertext_result.lock().unwrap();
+                    let query = shared_query.lock().unwrap();
+                    let store = shared_store.lock().unwrap();
+
+                    *sum = *sum + (query[start_index + i] * store[start_index + i]);
+                });
+
+                handles.push(handle);
+            }
+        }
+
+        for handle in handles {
+            handle.join().unwrap();
+        }
+
+        let result = *ciphertext_result.lock().unwrap();
+        Ok(result)
     }
 }
 

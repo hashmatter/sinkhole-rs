@@ -147,11 +147,43 @@ pub fn run_query_benchmark(c: &mut Criterion) {
     });
 }
 
+pub fn parallel_test_after(c: &mut Criterion) {
+    let mut group = c.benchmark_group("run_query_group");
+    group.sample_size(10);
+
+    fn setup(
+        size: usize,
+    ) -> (
+        sinkhole_elgamal::storage::Storage,
+        sinkhole_elgamal::client::Query,
+    ) {
+        let mut csprng = OsRng;
+
+        let storage_sk = SecretKey::new(&mut OsRng);
+        let client_sk = SecretKey::new(&mut OsRng);
+
+        let content: Vec<Scalar> = (1..size + 1).map(|_| Scalar::random(&mut csprng)).collect();
+        let storage = Storage::new(storage_sk.clone(), content.clone());
+        let query = Query::new(client_sk.clone(), size, 10).unwrap();
+
+        (storage, query)
+    }
+
+    let (storage_2pow15, query_2pow15) = setup(2usize.pow(15));
+
+    group.bench_function("Run query size 2^15", |b| {
+        b.iter(|| {
+            let _ = storage_2pow15.retrieve(query_2pow15.clone().encrypted);
+        })
+    });
+}
+
 criterion_group!(
     benches,
-    keypair_benchmark,
-    query_generation_benchmark,
-    db_setup_benchmark,
-    run_query_benchmark
+    //    keypair_benchmark,
+    //    query_generation_benchmark,
+    //    db_setup_benchmark,
+    //    run_query_benchmark
+    parallel_test_after,
 );
 criterion_main!(benches);
