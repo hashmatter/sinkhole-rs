@@ -1,8 +1,12 @@
 #![allow(dead_code)]
 use sinkhole_core::errors::StorageError;
+use sinkhole_core::utils::{
+    calculate_vector_boundaries, num_parallel_tasks, zero_ciphertext_from_pk,
+};
 
 use rand_core::OsRng;
-use std::cell::RefCell;
+use std::sync::{Arc, Mutex};
+use std::thread;
 
 use curve25519_dalek::scalar::Scalar;
 use elgamal_ristretto::ciphertext::Ciphertext;
@@ -13,7 +17,7 @@ use elgamal_ristretto::public::PublicKey;
 pub struct Storage {
     secret_key: SecretKey,
     size: usize,
-    store: RefCell<Vec<Scalar>>,
+    store: Vec<Scalar>,
 }
 
 impl Storage {
@@ -21,7 +25,7 @@ impl Storage {
         Storage {
             secret_key: sk,
             size: store.len(),
-            store: RefCell::new(store),
+            store,
         }
     }
 
@@ -32,47 +36,70 @@ impl Storage {
         Storage {
             secret_key: sk,
             size,
-            store: RefCell::new(empty_store),
+            store: empty_store,
         }
     }
 }
 
 impl sinkhole_core::traits::core::Storage for Storage {
-    fn add(&self, content: Scalar, index: usize) -> Result<(), StorageError> {
+    fn add(&mut self, content: Scalar, index: usize) -> Result<(), StorageError> {
         if index > self.size - 1 {
             return Err(StorageError {
                 error: "Index should not be larger than the size of the storage".to_string(),
             });
         }
 
-        let mut store = self.store.clone().into_inner();
+        let mut store = self.store.clone();
         store[index] = content; // TODO: how to deal with collisions?
-        self.store.replace(store);
+        self.store = store;
 
         Ok(())
     }
 
     // Runs encrypted query against the database state
     fn retrieve(&self, query: Vec<Ciphertext>) -> Result<Ciphertext, StorageError> {
+        let size = query.len();
+        let user_pk = query[0].pk;
+        let mut thread_handles = vec![];
+
         if query.len() != self.size {
             return Err(StorageError {
                 error: "Query vector should have the same size as the storage".to_string(),
             });
         }
 
-        let store = self.store.borrow();
-        let mut mult_vector = vec![];
-        for (index, content) in store.clone().into_iter().enumerate() {
-            let mul = query[index] * content;
-            mult_vector.push(mul);
+        // calculates index boundaries to distribute computation in different threads
+        let thread_segment_limits = calculate_vector_boundaries(&query, num_parallel_tasks());
+        let size_segment = size / thread_segment_limits.len();
+
+        let ciphertext_result = Arc::new(Mutex::new(zero_ciphertext_from_pk(user_pk)));
+        let shared_query = Arc::new(Mutex::new(query));
+        let shared_store = Arc::new(Mutex::new(self.store.clone())); // TODO: remove this clone
+
+        for segment_i in thread_segment_limits {
+            for i in 0..size_segment {
+                let ciphertext_result = Arc::clone(&ciphertext_result);
+                let shared_query = Arc::clone(&shared_query);
+                let shared_store = Arc::clone(&shared_store);
+
+                let handle = thread::spawn(move || {
+                    let mut sum = ciphertext_result.lock().unwrap();
+                    let query = shared_query.lock().unwrap(); // TODO: remove unwrap
+                    let store = shared_store.lock().unwrap(); // TODO: remove unwrap
+
+                    *sum = *sum + (query[segment_i + i] * store[segment_i + i]);
+                });
+
+                thread_handles.push(handle);
+            }
         }
 
-        let mut sum: Ciphertext = mult_vector[0];
-        for cipher in mult_vector {
-            sum = sum + cipher;
+        for handle in thread_handles {
+            handle.join().unwrap(); // TODO: remove unwrap
         }
 
-        Ok(sum)
+        let result = *ciphertext_result.lock().unwrap(); // TODO: remove unwrap
+        Ok(result)
     }
 }
 
@@ -85,7 +112,6 @@ fn generate_key_pair() -> (SecretKey, PublicKey) {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     extern crate bincode;

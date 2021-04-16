@@ -5,3 +5,4 @@ extern crate rand_core;
 
 pub mod errors;
 pub mod traits;
+pub mod utils;
