@@ -1,14 +1,12 @@
 #![allow(dead_code)]
 use sinkhole_core::errors::StorageError;
+use sinkhole_core::utils::*;
 
 use rand_core::OsRng;
-use std::sync::mpsc;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use curve25519_dalek::ristretto::RistrettoPoint;
 use curve25519_dalek::scalar::Scalar;
-use curve25519_dalek::traits::Identity;
 use elgamal_ristretto::ciphertext::Ciphertext;
 use elgamal_ristretto::private::SecretKey;
 use elgamal_ristretto::public::PublicKey;
@@ -25,7 +23,7 @@ impl Storage {
         Storage {
             secret_key: sk,
             size: store.len(),
-            store: store,
+            store,
         }
     }
 
@@ -58,30 +56,9 @@ impl sinkhole_core::traits::core::Storage for Storage {
 
     // Runs encrypted query against the database state
     fn retrieve(&self, query: Vec<Ciphertext>) -> Result<Ciphertext, StorageError> {
-        if query.len() != self.size {
-            return Err(StorageError {
-                error: "Query vector should have the same size as the storage".to_string(),
-            });
-        }
-
-        let store = self.store.clone();
-        let mut mult_vector = vec![];
-        for (index, content) in store.clone().into_iter().enumerate() {
-            let mul = query[index] * content;
-            mult_vector.push(mul);
-        }
-
-        let mut sum: Ciphertext = mult_vector[0];
-        for cipher in mult_vector {
-            sum = sum + cipher;
-        }
-
-        Ok(sum)
-    }
-
-    // Runs encrypted query against the database state in paralell
-    fn retrieve_parallel(&self, query: Vec<Ciphertext>) -> Result<Ciphertext, StorageError> {
         let size = query.len();
+        let user_pk = query[0].pk;
+        let mut thread_handles = vec![];
 
         if query.len() != self.size {
             return Err(StorageError {
@@ -89,24 +66,17 @@ impl sinkhole_core::traits::core::Storage for Storage {
             });
         }
 
-        let user_pk = query[0].pk;
+        // calculates index boundaries to distribute computation in different threads
+        let thread_segment_limits = utils::calculate_vector_boundaries(
+            &query, utils::num_parallel_tasks());
+        let size_segment = size / thread_segment_limits.len();
 
-        let mut handles = vec![];
-
-        // todo: refactor
-        let mut zero_ciphertext = Ciphertext {
-            points: (RistrettoPoint::identity(), RistrettoPoint::identity()),
-            pk: user_pk,
-        };
-        zero_ciphertext.points = (RistrettoPoint::identity(), RistrettoPoint::identity());
-
-        let ciphertext_result = Arc::new(Mutex::new(zero_ciphertext));
+        let ciphertext_result = Arc::new(Mutex::new(utils::zero_ciphertext_from_pk(user_pk)));
         let shared_query = Arc::new(Mutex::new(query));
         let shared_store = Arc::new(Mutex::new(self.store.clone())); // TODO: remove this clone
 
-        for segment_i in 0..2 {
-            for i in 0..size / 2 {
-                let start_index = segment_i * size / 2;
+        for segment_i in thread_segment_limits {
+            for i in 0..size_segment{
 
                 let ciphertext_result = Arc::clone(&ciphertext_result);
                 let shared_query = Arc::clone(&shared_query);
@@ -114,21 +84,21 @@ impl sinkhole_core::traits::core::Storage for Storage {
 
                 let handle = thread::spawn(move || {
                     let mut sum = ciphertext_result.lock().unwrap();
-                    let query = shared_query.lock().unwrap();
-                    let store = shared_store.lock().unwrap();
+                    let query = shared_query.lock().unwrap(); // TODO: remove unwrap
+                    let store = shared_store.lock().unwrap(); // TODO: remove unwrap
 
-                    *sum = *sum + (query[start_index + i] * store[start_index + i]);
+                    *sum = *sum + (query[segment_i + i] * store[segment_i + i]);
                 });
 
-                handles.push(handle);
+                thread_handles.push(handle);
             }
         }
 
-        for handle in handles {
-            handle.join().unwrap();
+        for handle in thread_handles {
+            handle.join().unwrap(); // TODO: remove unwrap 
         }
 
-        let result = *ciphertext_result.lock().unwrap();
+        let result = *ciphertext_result.lock().unwrap(); // TODO: remove unwrap 
         Ok(result)
     }
 }
@@ -142,7 +112,6 @@ fn generate_key_pair() -> (SecretKey, PublicKey) {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     extern crate bincode;

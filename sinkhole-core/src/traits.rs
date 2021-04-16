@@ -19,7 +19,6 @@ pub mod core {
 
         /// Returns the data for a given ID.
         fn retrieve(&self, query: Vec<Ciphertext>) -> Result<Ciphertext, StorageError>;
-        fn retrieve_parallel(&self, query: Vec<Ciphertext>) -> Result<Ciphertext, StorageError>;
     }
 
     pub trait Query {
