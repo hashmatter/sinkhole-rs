@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 use sinkhole_core::errors::StorageError;
-use sinkhole_core::utils::*;
+use sinkhole_core::utils::{
+    calculate_vector_boundaries, num_parallel_tasks, zero_ciphertext_from_pk,
+};
 
 use rand_core::OsRng;
 use std::sync::{Arc, Mutex};
@@ -67,17 +69,15 @@ impl sinkhole_core::traits::core::Storage for Storage {
         }
 
         // calculates index boundaries to distribute computation in different threads
-        let thread_segment_limits = utils::calculate_vector_boundaries(
-            &query, utils::num_parallel_tasks());
+        let thread_segment_limits = calculate_vector_boundaries(&query, num_parallel_tasks());
         let size_segment = size / thread_segment_limits.len();
 
-        let ciphertext_result = Arc::new(Mutex::new(utils::zero_ciphertext_from_pk(user_pk)));
+        let ciphertext_result = Arc::new(Mutex::new(zero_ciphertext_from_pk(user_pk)));
         let shared_query = Arc::new(Mutex::new(query));
         let shared_store = Arc::new(Mutex::new(self.store.clone())); // TODO: remove this clone
 
         for segment_i in thread_segment_limits {
-            for i in 0..size_segment{
-
+            for i in 0..size_segment {
                 let ciphertext_result = Arc::clone(&ciphertext_result);
                 let shared_query = Arc::clone(&shared_query);
                 let shared_store = Arc::clone(&shared_store);
@@ -95,10 +95,10 @@ impl sinkhole_core::traits::core::Storage for Storage {
         }
 
         for handle in thread_handles {
-            handle.join().unwrap(); // TODO: remove unwrap 
+            handle.join().unwrap(); // TODO: remove unwrap
         }
 
-        let result = *ciphertext_result.lock().unwrap(); // TODO: remove unwrap 
+        let result = *ciphertext_result.lock().unwrap(); // TODO: remove unwrap
         Ok(result)
     }
 }

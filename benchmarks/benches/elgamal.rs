@@ -152,7 +152,7 @@ pub fn one_threaded_retrieve_test(c: &mut Criterion) {
     group.sample_size(10);
 
     // only one thread
-    std::env::set_var("N_PARALLEL_TASKS", 1.to_string()); 
+    std::env::set_var("N_PARALLEL_TASKS", 1.to_string());
 
     fn setup(
         size: usize,
@@ -186,7 +186,7 @@ pub fn parallel_retrieve_test(c: &mut Criterion) {
     group.sample_size(10);
 
     // run in 4 threads
-    std::env::set_var("N_PARALLEL_TASKS", 4.to_string()); 
+    std::env::set_var("N_PARALLEL_TASKS", 4.to_string());
 
     fn setup(
         size: usize,
@@ -217,10 +217,10 @@ pub fn parallel_retrieve_test(c: &mut Criterion) {
 
 criterion_group!(
     benches,
-    //    keypair_benchmark,
-    //    query_generation_benchmark,
-    //    db_setup_benchmark,
-    //    run_query_benchmark
+    keypair_benchmark,
+    query_generation_benchmark,
+    db_setup_benchmark,
+    run_query_benchmark,
     parallel_retrieve_test,
     one_threaded_retrieve_test,
 );
